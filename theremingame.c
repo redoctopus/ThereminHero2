@@ -197,14 +197,37 @@ void checkKey(SDL_Keycode key, wavedata* wavedata_ptr) {
   }
 }
 
-void drawNoteRectangle(int index, SDL_Renderer* renderer) {
+
+/*============< drawNoteRectangle >=============*
+ * Draw rectangle that corresponds to the note  *
+ * that the theremin is currently playing.      *
+ *==============================================*/
+void drawNoteRectangle(int index, SDL_Renderer *renderer) {
     SDL_Rect r;
     r.x = index*50+50;
     r.y = (int)(5.0/6.0*HEIGHT);
     r.w = 50;
-    r.h = 50;
+    r.h = 25;
     SDL_SetRenderDrawColor(renderer, 0,0,255,255);
     SDL_RenderFillRect(renderer, &r);
+}
+
+
+/*===============< drawLaneLines >===============*
+ * Draw separating lines between note lanes      *
+ * (where the notes scroll down).                *
+ *===============================================*/
+void drawLaneLines(SDL_Renderer *renderer) {
+  SDL_SetRenderDrawColor(renderer, 5, 42, 100, 255);  // Dark blue
+  SDL_RenderDrawLine(renderer, 50, 50, 50, (int)(5.0/6.0*HEIGHT)+24);
+  SDL_RenderDrawLine(renderer,100, 50,100, (int)(5.0/6.0*HEIGHT)+24);
+  SDL_RenderDrawLine(renderer,150, 50,150, (int)(5.0/6.0*HEIGHT)+24);
+  SDL_RenderDrawLine(renderer,200, 50,200, (int)(5.0/6.0*HEIGHT)+24);
+  SDL_RenderDrawLine(renderer,250, 50,250, (int)(5.0/6.0*HEIGHT)+24);
+  SDL_RenderDrawLine(renderer,300, 50,300, (int)(5.0/6.0*HEIGHT)+24);
+  SDL_RenderDrawLine(renderer,350, 50,350, (int)(5.0/6.0*HEIGHT)+24);
+  SDL_RenderDrawLine(renderer,400, 50,400, (int)(5.0/6.0*HEIGHT)+24);
+  SDL_RenderDrawLine(renderer,450, 50,450, (int)(5.0/6.0*HEIGHT)+24);
 }
 
 
@@ -348,6 +371,9 @@ int main(int argc, char* argv[]) {
     // Render message texture
     SDL_RenderCopy(renderer, message, NULL, &message_rect);
     SDL_RenderCopy(renderer, nmessage, NULL, &nmessage_rect);
+
+    /* ==========<< Draw Lanes >>========== */
+    drawLaneLines(renderer);
 
     /* =======<< Rectangle With Current Note >>======= */
     drawNoteRectangle(my_wavedata.pitchindex, renderer);
