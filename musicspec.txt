@@ -1,0 +1,4 @@
+Theremin Hero 2 music file specification
+Line 1: MP3 listing
+Line 2: MP3 time start offset
+Line 3-end: note index, duration in frames (comma-separated)
