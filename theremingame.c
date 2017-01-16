@@ -13,6 +13,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "theremin.h"
+
 #ifndef M_PI
   #define M_PI 3.1415926535897932384
 #endif
@@ -22,6 +24,8 @@
 #define PIANO 2
 #define GUITAR 0.5
 
+#define WIDTH 1024
+#define HEIGHT 768
 
 /*==========<< GLOBALS >>===========*/
 
@@ -69,6 +73,7 @@ void updateWavedata(wavedata *userdata, int newPitch);
 
 /*=========<< END GLOBALS >>=========*/
 
+/********<< Helper Functions >>*********/
 
 /*=======<< generateWaveform (Callback Function) >>=======*
  * Fill audio buffer w/ glorious FM synth!                *
@@ -118,8 +123,76 @@ void generateWaveform(void *userdata, Uint8 *stream, int len) {
 }
 
 
-void readFromTheremin() {
-  return;
+/*==========< createWant >===========*
+ * Initialize the "want" Audiospec,  *
+ * and set its values appropriately  *
+ *===================================*/
+
+void createWant(SDL_AudioSpec *wantpoint, wavedata *userdata) {
+
+  wantpoint->freq = 48000;        // Sample rate of RasPi's sound system
+  wantpoint->format = AUDIO_S16SYS;  // 32-bit floating pt samples, little-endian
+  wantpoint->channels = 1;
+  wantpoint->samples = 800;       // (48000 samples/sec)/(60 frames/sec)
+                                  //  = 800 samp/frame
+  wantpoint->callback = generateWaveform;
+
+  // Set info in wavedata struct
+  userdata->pitchindex = 0;          // Start at C4
+  userdata->modulator_pitch = instr*440;
+  userdata->modulator_phase = 0.0;
+  userdata->carrier_phase = 0.0;
+  userdata->modulator_amplitude = 0.4;
+
+  wantpoint->userdata = userdata;
+}
+
+
+
+/*================< updateWavedata >================*
+ * Update the wavedata (userdata) with values from  *
+ * the theremin.                                    *
+ *==================================================*/
+
+void updateWavedata(wavedata *userdata, int newPitch) {
+  userdata->pitchindex = newPitch;
+}
+
+
+/*================< checkKey >=================*
+ * Check the key that was pressed, and         *
+ * respond appropriately.                      *
+ *=============================================*/
+void checkKey(SDL_Keycode key, wavedata* wavedata_ptr) {
+  int pitchindex = wavedata_ptr->pitchindex;
+
+  /* Quit */
+  if (key == SDLK_ESCAPE || key == SDLK_q) {
+    quit = 1;
+  }
+  /* Raise pitch by one note */
+  else if (key == SDLK_UP && pitchindex < 7) {
+    updateWavedata(wavedata_ptr, pitchindex+1);
+    printf("%d\n", pitchindex);
+  }
+  /* Lower pitch by one note */
+  else if (key == SDLK_DOWN && pitchindex > 0) {
+    updateWavedata(wavedata_ptr, pitchindex-1);
+    printf("%d\n", pitchindex);
+  }
+  /* Change to colorblind mode */
+  else if (key == SDLK_BACKSPACE) {
+    colorblind = (colorblind+1)%2;
+  }
+  /* Change instruments */
+  else if (key == SDLK_i) {
+    instr = (instr == PIANO) ? GUITAR : PIANO;
+    updateWavedata(wavedata_ptr, pitchindex);
+  }
+  /* Mute */
+  else if (key == SDLK_m) {
+    mute = (mute+1)%2;
+  }
 }
 
 
@@ -175,14 +248,13 @@ int main(int argc, char* argv[]) {
 
   // Create window and renderer
   window = SDL_CreateWindow("SDL_RenderClear",
-      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 512, 512, 0);
+      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
   renderer = SDL_CreateRenderer(window, -1, 0);
 
   /* Text */
 
   // Opens font
-  font = TTF_OpenFont("/Library/Fonts/Arial.ttf", 12);
-  //font = TTF_OpenFont("/usr/share/fonts/Droid/Roboto_Regular.ttf", 12);
+  font = TTF_OpenFont("/Library/Fonts/Impact.ttf", 72);
   if(font == NULL) {
     printf("Font not found\n");
     return 1;
@@ -204,34 +276,7 @@ int main(int argc, char* argv[]) {
         /* Key pressed */
         case SDL_KEYDOWN:
           key = event.key.keysym.sym;
-
-          /* Quit */
-          if (key == SDLK_ESCAPE || key == SDLK_q) {
-            quit = 1;
-          }
-          /* Raise pitch by one note */
-          else if (key == SDLK_UP && my_wavedata.pitchindex < 7) {
-            updateWavedata(&my_wavedata, my_wavedata.pitchindex+1);
-            printf("%d\n", my_wavedata.pitchindex);
-          }
-          /* Lower pitch by one note */
-          else if (key == SDLK_DOWN && my_wavedata.pitchindex > 0) {
-            updateWavedata(&my_wavedata, my_wavedata.pitchindex-1);
-            printf("%d\n", my_wavedata.pitchindex);
-          }
-          /* Change to colorblind mode */
-          else if (key == SDLK_BACKSPACE) {
-            colorblind = (colorblind+1)%2;
-          }
-          /* Change instruments */
-          else if (key == SDLK_i) {
-            instr = (instr == PIANO) ? GUITAR : PIANO;
-            updateWavedata(&my_wavedata, my_wavedata.pitchindex);
-          }
-          /* Mute */
-          else if (key == SDLK_m) {
-            mute = (mute+1)%2;
-          }
+          checkKey(key, &my_wavedata);
           break;
         /* Exit */
         case SDL_QUIT:
@@ -309,41 +354,5 @@ int main(int argc, char* argv[]) {
 }
 
 
-/********<< Helper Functions >>*********/
-
-/*==========< createWant >===========*
- * Initialize the "want" Audiospec,  *
- * and set its values appropriately  *
- *===================================*/
-
-void createWant(SDL_AudioSpec *wantpoint, wavedata *userdata) {
-
-  wantpoint->freq = 48000;        // Sample rate of RasPi's sound system
-  wantpoint->format = AUDIO_S16SYS;  // 32-bit floating pt samples, little-endian
-  wantpoint->channels = 1;
-  wantpoint->samples = 800;       // (48000 samples/sec)/(60 frames/sec)
-                                  //  = 800 samp/frame
-  wantpoint->callback = generateWaveform;
-
-  // Set info in wavedata struct
-  userdata->pitchindex = 0;          // Start at C4
-  userdata->modulator_pitch = instr*440;
-  userdata->modulator_phase = 0.0;
-  userdata->carrier_phase = 0.0;
-  userdata->modulator_amplitude = 0.4;
-
-  wantpoint->userdata = userdata;
-}
-
-
-
-/*================< updateWavedata >================*
- * Update the wavedata (userdata) with values from  *
- * the theremin.                                    *
- *==================================================*/
-
-void updateWavedata(wavedata *userdata, int newPitch) {
-  userdata->pitchindex = newPitch;
-}
 
 
