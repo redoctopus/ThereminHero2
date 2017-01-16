@@ -24,10 +24,12 @@
 #define PIANO 2
 #define GUITAR 0.5
 
-#define WIDTH 1024
+#define WIDTH 512
 #define HEIGHT 768
 
 /*==========<< GLOBALS >>===========*/
+
+uint64_t frame_cntr = 0; /* Frame counter for updating drawing */
 
 int quit = 0;         /* Did the user hit quit? */
 float instr = PIANO;  /* Chosen instrument */
@@ -343,14 +345,11 @@ int main(int argc, char* argv[]) {
     // Set background color
     SDL_RenderClear(renderer);
 
-    SDL_SetRenderDrawColor(renderer, 54, 79, 60, 255);     // Green
-    SDL_RenderDrawLine(renderer, 5, 5, 340, 340);     // Awkward diagonal line
-
     // Render message texture
     SDL_RenderCopy(renderer, message, NULL, &message_rect);
     SDL_RenderCopy(renderer, nmessage, NULL, &nmessage_rect);
 
-    /* =======<< Rectangle Showing Note >>======= */
+    /* =======<< Rectangle With Current Note >>======= */
     drawNoteRectangle(my_wavedata.pitchindex, renderer);
 
     // Move to foreground
@@ -358,6 +357,9 @@ int main(int argc, char* argv[]) {
 
     /* =========<< Audio >>========== */
     SDL_PauseAudioDevice(dev, mute);
+
+    // Update frame counter
+    frame_cntr++;
   }
 
   // CLEAN YO' ROOM (Cleanup)
