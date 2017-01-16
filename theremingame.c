@@ -22,8 +22,6 @@
 #define PIANO 2
 #define GUITAR 0.5
 
-#define PIN18 RPI_GPIO_P1_12 // RPi input pin
-
 
 /*==========<< GLOBALS >>===========*/
 
@@ -190,14 +188,14 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   SDL_Color normalFontColor = {50, 170, 255};   // Darker blue
-  SDL_Color cbFontColor = {80, 100, 80};        // Weird green
+  SDL_Color cbFontColor = {54, 79, 60};        // Weird green
   SDL_Color fontColor = normalFontColor;
   
 
   /*********< Okay, game time! >***********/
   while (!quit) {
 
-    //get current light level
+    // Get theremin input
     readFromTheremin(); // Dummy Function ###############!!!!!!!!!!!##########
     /* ==========<< Poll for events >>============ */
     while (SDL_PollEvent(&event)) {
@@ -282,13 +280,13 @@ int main(int argc, char* argv[]) {
     // Choose background color
     SDL_SetRenderDrawColor(renderer, 170, 200, 215, 255);   // Light blue
     if (colorblind) {
-      SDL_SetRenderDrawColor(renderer, 90, 60, 80, 255);    // Dark magenta
+      SDL_SetRenderDrawColor(renderer, 79, 54, 58, 255);    // Dark brown
     }
 
     // Set background color
     SDL_RenderClear(renderer);
 
-    SDL_SetRenderDrawColor(renderer, 200, 255, 0, 255);     // Green
+    SDL_SetRenderDrawColor(renderer, 54, 79, 60, 255);     // Green
     SDL_RenderDrawLine(renderer, 5, 5, 340, 340);     // Awkward diagonal line
 
     // Render message texture
