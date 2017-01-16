@@ -195,6 +195,17 @@ void checkKey(SDL_Keycode key, wavedata* wavedata_ptr) {
   }
 }
 
+void drawNoteRectangle(int index, SDL_Renderer* renderer) {
+    SDL_Rect r;
+    r.x = index*50+50;
+    r.y = (int)(5.0/6.0*HEIGHT);
+    r.w = 50;
+    r.h = 50;
+    SDL_SetRenderDrawColor(renderer, 0,0,255,255);
+    SDL_RenderFillRect(renderer, &r);
+}
+
+
 
 /*=============<< main >>==============*
  * Get that party started!             *
@@ -320,6 +331,7 @@ int main(int argc, char* argv[]) {
     nmessage_rect.w = 100;
     nmessage_rect.h = 50;
 
+
     /* ========<< Background >>========= */
 
     // Choose background color
@@ -337,6 +349,9 @@ int main(int argc, char* argv[]) {
     // Render message texture
     SDL_RenderCopy(renderer, message, NULL, &message_rect);
     SDL_RenderCopy(renderer, nmessage, NULL, &nmessage_rect);
+
+    /* =======<< Rectangle Showing Note >>======= */
+    drawNoteRectangle(my_wavedata.pitchindex, renderer);
 
     // Move to foreground
     SDL_RenderPresent(renderer);
