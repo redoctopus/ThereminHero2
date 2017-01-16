@@ -12,7 +12,6 @@
 #include <SDL2/SDL_ttf.h>
 #include <string.h>
 #include <math.h>
-#include <bcm2835.h>
 
 #ifndef M_PI
   #define M_PI 3.1415926535897932384
@@ -121,6 +120,10 @@ void generateWaveform(void *userdata, Uint8 *stream, int len) {
 }
 
 
+void readFromTheremin() {
+  return;
+}
+
 
 /*=============<< main >>==============*
  * Get that party started!             *
@@ -181,7 +184,7 @@ int main(int argc, char* argv[]) {
 
   // Opens font
   //font = TTF_OpenFont("/Library/Fonts/Arial.ttf", 12);
-  font = TTF_OpenFont("/usr/share/fonts/Droid/Roboto_Regular.ttf");
+  font = TTF_OpenFont("/usr/share/fonts/Droid/Roboto_Regular.ttf", 12);
   if(font == NULL) {
     printf("Font not found\n");
     return 1;
@@ -195,7 +198,7 @@ int main(int argc, char* argv[]) {
   while (!quit) {
 
     //get current light level
-    updateWavedata(&my_wavedata, readLight());
+    readFromTheremin(); // Dummy Function ###############!!!!!!!!!!!##########
     /* ==========<< Poll for events >>============ */
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
@@ -345,22 +348,4 @@ void updateWavedata(wavedata *userdata, int newPitch) {
   userdata->pitchindex = newPitch;
 }
 
-/*================< readLight >================*
- * Read from the light sensor                  *
- *=============================================*/
-int readLight(){
-  if(!bcm2835_init) return 1;
-  while(1){
-    int value = 0;
-    bcm2835_gpio_fsel(PIN18, BCM2835_GPIO_FSEL_OUTP); // set pin to output
-    bcm2835_gpio_write(PIN18, LOW); //drive pin low
-    bcm2835_delay(100); // wait for cap to discharge
-    bcm2835_gpio_fsel(PIN18, BCM2835_GPIO_FSEL_INPT); // set pin to input
-    // see how long it takes to charge cap
-    while(bcm2835_gpio_lev(PIN18) == LOW){
-      value++;
-      if(value == 8) break;
-    }
-    return value;
-  }
-}
+
