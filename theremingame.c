@@ -231,6 +231,20 @@ void drawLaneLines(SDL_Renderer *renderer) {
 }
 
 
+/*==================< drawNotes >====================*
+ * Draw the notes that are dropping down from above, *
+ * given the array of notes.                         *
+ *                                                   *
+ * Args:                                             *
+ *   songNotes: array of notes                       *
+ *   start: index of first note to be drawn          *
+ *   end: index of last note to be drawn             *
+ *   renderer: SDL_Renderer                          *
+ *===================================================*/
+void drawNotes(note *notes, int start, int end, SDL_Renderer *renderer) {
+}
+
+
 
 /*=============<< main >>==============*
  * Get that party started!             *
